@@ -33,14 +33,14 @@ class DistanceConverter(tk.Tk):
             frame = FrameClass(container, self)
             self.frames[FrameClass] = frame
             frame.grid(row=0, column=0, sticky="NSEW")
-
+        
+        self.show_frame(MetersToFeet)
 
     def show_frame(self, container):
         frame = self.frames[container]
+        self.bind("<Return>", frame.calculate)
+        self.bind("<KP_Enter>", frame.calculate)
         frame.tkraise()
-
-        #self.bind("<Return>", self.frame.calculate_feet)
-        #self.bind("<KP_Enter>", self.frame.calculate_feet)
 
 class MetersToFeet(ttk.Frame):
     def __init__(self, container, controller, **kwargs):
@@ -53,7 +53,7 @@ class MetersToFeet(ttk.Frame):
         meters_input = ttk.Entry(self, width=10, textvariable=self.meters_value)
         feet_label = ttk.Label(self, text="Feet: ")
         feet_display = ttk.Label(self, textvariable=self.feet_value)
-        calc_button = ttk.Button(self, text="Calculate", command=self.calculate_feet)
+        calc_button = ttk.Button(self, text="Calculate", command=self.calculate)
         switch_page_button = ttk.Button(
             self,
             text="Switch to feet conversion",
@@ -70,7 +70,7 @@ class MetersToFeet(ttk.Frame):
         calc_button.grid(column=0, row=2, columnspan=2, sticky ="EW",padx=5, pady=5)
         switch_page_button.grid(column=0, row=3, columnspan=2, sticky="EW")
 
-    def calculate_feet(self, *args):
+    def calculate(self, *args):
             try:
                 meters = float(self.meters_value.get())
                 feet = meters * 3.28084
@@ -89,7 +89,7 @@ class FeetToMeters(ttk.Frame):
         feet_input = ttk.Entry(self, width=10, textvariable=self.feet_value)
         meters_label = ttk.Label(self, text="Meters: ")
         meters_display = ttk.Label(self, textvariable=self.meters_value)
-        calc_button = ttk.Button(self, text="Calculate", command=self.calculate_meters)
+        calc_button = ttk.Button(self, text="Calculate", command=self.calculate)
         switch_page_button = ttk.Button(
             self,
             text="Switch to meters conversion",
@@ -106,7 +106,7 @@ class FeetToMeters(ttk.Frame):
         calc_button.grid(column=0, row=2, columnspan=2, sticky ="EW",padx=5, pady=5)
         switch_page_button.grid(column=0, row=3, columnspan=2, sticky="EW")
 
-    def calculate_meters(self, *args):
+    def calculate(self, *args):
             try:
                 feet = float(self.feet_value.get())
                 meters = feet / 3.28084
