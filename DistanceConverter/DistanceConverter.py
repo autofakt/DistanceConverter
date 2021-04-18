@@ -15,14 +15,35 @@ class DistanceConverter(tk.Tk):
         super().__init__(*args, **kwargs)
 
         self.title("Distance Converter")
-        self.frame = MetersToFeet(self, padding=(60,30))
-        self.frame.grid()
+        self.frames = dict()
 
-        self.bind("<Return>", self.frame.calculate_feet)
-        self.bind("<KP_Enter>", self.frame.calculate_feet)
+        container = ttk.Frame(self)
+        container.grid(padx=60, pady=30, sticky="EW")
+
+        feet_to_meters = FeetToMeters(container, self)
+        feet_to_meters.grid(row=0, column=0, sticky="NSEW")
+
+        meters_to_feet = MetersToFeet(container, self)
+        meters_to_feet.grid(row=0, column=0, sticky="NSEW")
+
+        self.frames[FeetToMeters] = feet_to_meters
+        self.frames[MetersToFeet] = meters_to_feet
+        
+        for FrameClass in (MetersToFeet, FeetToMeters):
+            frame = FrameClass(container, self)
+            self.frames[FrameClass] = frame
+            frame.grid(row=0, column=0, sticky="NSEW")
+
+
+    def show_frame(self, container):
+        frame = self.frames[container]
+        frame.tkraise()
+
+        #self.bind("<Return>", self.frame.calculate_feet)
+        #self.bind("<KP_Enter>", self.frame.calculate_feet)
 
 class MetersToFeet(ttk.Frame):
-    def __init__(self, container, **kwargs):
+    def __init__(self, container, controller, **kwargs):
         super().__init__(container, **kwargs)
 
         self.feet_value = tk.StringVar()
@@ -33,6 +54,11 @@ class MetersToFeet(ttk.Frame):
         feet_label = ttk.Label(self, text="Feet: ")
         feet_display = ttk.Label(self, textvariable=self.feet_value)
         calc_button = ttk.Button(self, text="Calculate", command=self.calculate_feet)
+        switch_page_button = ttk.Button(
+            self,
+            text="Switch to feet conversion",
+            command=lambda: controller.show_frame(FeetToMeters)
+            )
 
         meters_label.grid(column=0, row=0, sticky="W", padx=5, pady=5)
         meters_input.grid(column=1, row=0, sticky="EW",padx=5, pady=5)
@@ -42,6 +68,7 @@ class MetersToFeet(ttk.Frame):
         feet_display.grid(column=1, row=1, sticky ="EW",padx=5, pady=5)
 
         calc_button.grid(column=0, row=2, columnspan=2, sticky ="EW",padx=5, pady=5)
+        switch_page_button.grid(column=0, row=3, columnspan=2, sticky="EW")
 
     def calculate_feet(self, *args):
             try:
@@ -51,6 +78,41 @@ class MetersToFeet(ttk.Frame):
             except ValueError:
                 pass
 
+class FeetToMeters(ttk.Frame):
+    def __init__(self, container, controller, **kwargs):
+        super().__init__(container, **kwargs)
+
+        self.feet_value = tk.StringVar()
+        self.meters_value = tk.StringVar()
+
+        feet_label = ttk.Label(self, text="Feet: ")
+        feet_input = ttk.Entry(self, width=10, textvariable=self.feet_value)
+        meters_label = ttk.Label(self, text="Meters: ")
+        meters_display = ttk.Label(self, textvariable=self.meters_value)
+        calc_button = ttk.Button(self, text="Calculate", command=self.calculate_meters)
+        switch_page_button = ttk.Button(
+            self,
+            text="Switch to meters conversion",
+            command=lambda: controller.show_frame(MetersToFeet)
+            )
+
+        feet_label.grid(column=0, row=0, sticky="W", padx=5, pady=5)
+        feet_input.grid(column=1, row=0, sticky="EW",padx=5, pady=5)
+        feet_input.focus()
+
+        meters_label.grid(column=0, row=1, sticky ="W",padx=5, pady=5)
+        meters_display.grid(column=1, row=1, sticky ="EW",padx=5, pady=5)
+
+        calc_button.grid(column=0, row=2, columnspan=2, sticky ="EW",padx=5, pady=5)
+        switch_page_button.grid(column=0, row=3, columnspan=2, sticky="EW")
+
+    def calculate_meters(self, *args):
+            try:
+                feet = float(self.feet_value.get())
+                meters = feet / 3.28084
+                self.meters_value.set(f"{meters:.3f}")
+            except ValueError:
+                pass
 
 root = DistanceConverter()
 
